@@ -8,24 +8,11 @@ const pool = new Pool({
   connectionTimeoutMillis: 15000,
 });
 
-// تست اتصال هنگام راه‌اندازی
-pool.on('connect', () => {
-  console.log('✅ Connected to PostgreSQL');
-});
-
-pool.on('error', (err) => {
-  console.error('❌ PostgreSQL error:', err);
-});
-
-export const db = {
+// فقط یک بار export کن
+const db = {
   query: (text, params) => {
-    console.log('📊 Running query:', text.substring(0, 100));
     return pool.query(text, params);
   },
-};
-
-const db = {
-  query: (text, params) => pool.query(text, params),
 };
 
 // هش کردن رمز عبور

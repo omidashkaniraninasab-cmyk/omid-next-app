@@ -3,9 +3,6 @@
 import { registerUser, loginUser } from './lib';
 
 export async function registerAction(formData) {
-  // لاگ برای سرور
-  console.log('🚀 Register action called on server');
-  
   const userData = {
     username: formData.get('username'),
     display_name: formData.get('display_name'),
@@ -16,14 +13,8 @@ export async function registerAction(formData) {
     phone_number: formData.get('phone_number') || null,
   };
 
-  try {
-    const result = await registerUser(userData);
-    console.log('📊 Register result:', result);
-    return result;
-  } catch (error) {
-    console.error('❌ Register error:', error);
-    return { success: false, error: 'خطا در ثبت نام' };
-  }
+  const result = await registerUser(userData);
+  return result;
 }
 
 export async function loginAction(formData) {
