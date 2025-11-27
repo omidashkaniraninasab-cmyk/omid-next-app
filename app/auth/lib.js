@@ -2,9 +2,9 @@ import bcrypt from 'bcryptjs';
 import { Pool } from 'pg';
 
 // مستقیم از environment variable استفاده کن
-const connectionString = process.env.NEON_DATABASE_URL;
+const connectionString = process.env.DB_URL;
 
-console.log('🔗 Database URL:', connectionString ? 'AVAILABLE' : 'MISSING');
+console.log('🔗 Using DB_URL:', !!connectionString);
 
 const pool = new Pool({
   connectionString: connectionString,
@@ -15,6 +15,7 @@ const pool = new Pool({
 const db = {
   query: (text, params) => pool.query(text, params),
 };
+
 
 // بقیه توابع بدون تغییر...
 async function hashPassword(password) {
