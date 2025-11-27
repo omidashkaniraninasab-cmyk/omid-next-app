@@ -2,9 +2,9 @@ import bcrypt from 'bcryptjs';
 import { Pool } from 'pg';
 
 // مستقیم از environment variable استفاده کن
-const connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+const connectionString = process.env.NEON_DATABASE_URL;
 
-console.log('🔗 Database URL available:', !!connectionString);
+console.log('🔗 Database URL:', connectionString ? 'AVAILABLE' : 'MISSING');
 
 const pool = new Pool({
   connectionString: connectionString,
