@@ -4,11 +4,25 @@ import { Pool } from 'pg';
 // اتصال به دیتابیس
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  // تنظیمات برای سرور
-  connectionTimeoutMillis: 10000,
-  idleTimeoutMillis: 30000,
+  ssl: { rejectUnauthorized: false },
+  connectionTimeoutMillis: 15000,
 });
+
+// تست اتصال هنگام راه‌اندازی
+pool.on('connect', () => {
+  console.log('✅ Connected to PostgreSQL');
+});
+
+pool.on('error', (err) => {
+  console.error('❌ PostgreSQL error:', err);
+});
+
+export const db = {
+  query: (text, params) => {
+    console.log('📊 Running query:', text.substring(0, 100));
+    return pool.query(text, params);
+  },
+};
 
 const db = {
   query: (text, params) => pool.query(text, params),
