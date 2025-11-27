@@ -1,44 +1,36 @@
 import bcrypt from 'bcryptjs';
 import { Pool } from 'pg';
 
+// مستقیم از environment variable استفاده کن
 const connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
 
-// اتصال به دیتابیس
+console.log('🔗 Database URL available:', !!connectionString);
+
 const pool = new Pool({
   connectionString: connectionString,
   ssl: { rejectUnauthorized: false },
   connectionTimeoutMillis: 15000,
 });
 
-console.log('🔗 Database host:', connectionString ? new URL(connectionString).hostname : 'NOT SET');
-
 const db = {
-  query: (text, params) => {
-    return pool.query(text, params);
-  },
+  query: (text, params) => pool.query(text, params),
 };
 
-// هش کردن رمز عبور
+// بقیه توابع بدون تغییر...
 async function hashPassword(password) {
   return await bcrypt.hash(password, 12);
 }
 
-// بررسی رمز عبور
 async function verifyPassword(password, hashedPassword) {
   return await bcrypt.compare(password, hashedPassword);
 }
 
-// ثبت کاربر جدید
 async function registerUser(userData) {
   try {
     const hashedPassword = await hashPassword(userData.password);
     
     const result = await db.query(
-      `INSERT INTO users (
-        username, display_name, email, password_hash, 
-        first_name, last_name, phone_number
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7) 
-      RETURNING user_id, public_id, username, email, display_name, created_at`,
+      `INSERT INTO users (username, display_name, email, password_hash, first_name, last_name, phone_number) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING user_id, public_id, username, email, display_name, created_at`,
       [
         userData.username,
         userData.display_name,
@@ -64,14 +56,10 @@ async function registerUser(userData) {
   }
 }
 
-// ورود کاربر
 async function loginUser(email, password) {
   try {
     const result = await db.query(
-      `SELECT user_id, public_id, username, email, display_name, password_hash, 
-              status, email_verified
-       FROM users 
-       WHERE email = $1 AND status = 'active'`,
+      `SELECT user_id, public_id, username, email, display_name, password_hash, status, email_verified FROM users WHERE email = $1 AND status = 'active'`,
       [email]
     );
     
@@ -86,7 +74,6 @@ async function loginUser(email, password) {
       return { success: false, error: 'ایمیل یا رمز عبور اشتباه است' };
     }
     
-    // آپدیت زمان آخرین ورود
     await db.query(
       'UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE user_id = $1',
       [user.user_id]
@@ -108,15 +95,10 @@ async function loginUser(email, password) {
   }
 }
 
-// دریافت کاربر جاری
 async function getCurrentUser(userId) {
   try {
     const result = await db.query(
-      `SELECT user_id, public_id, username, email, display_name, 
-              first_name, last_name, phone_number, status, 
-              email_verified, last_login_at, created_at
-       FROM users 
-       WHERE user_id = $1 AND status = 'active'`,
+      `SELECT user_id, public_id, username, email, display_name, first_name, last_name, phone_number, status, email_verified, last_login_at, created_at FROM users WHERE user_id = $1 AND status = 'active'`,
       [userId]
     );
     
@@ -126,7 +108,6 @@ async function getCurrentUser(userId) {
   }
 }
 
-// Export همه توابع
 export {
   db,
   hashPassword,
