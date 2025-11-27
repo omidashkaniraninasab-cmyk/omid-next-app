@@ -1,14 +1,17 @@
 import bcrypt from 'bcryptjs';
 import { Pool } from 'pg';
 
+const connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+
 // اتصال به دیتابیس
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: connectionString,
   ssl: { rejectUnauthorized: false },
   connectionTimeoutMillis: 15000,
 });
 
-// فقط یک بار export کن
+console.log('🔗 Database host:', connectionString ? new URL(connectionString).hostname : 'NOT SET');
+
 const db = {
   query: (text, params) => {
     return pool.query(text, params);
